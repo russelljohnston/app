@@ -36,11 +36,9 @@ shinyUI(fluidPage(
   
     
     mainPanel(
-      plotOutput("histrent"),
-      textOutput("pErr"),
-      textOutput("numTxt"),
-      textOutput("meanTxt"),
-      textOutput("medTxt")
+      plotOutput("histrent",width = "100%"),
+      textOutput("pErr")
+      # plotOutput("transtable")
               )
    )
 ))
