@@ -1,0 +1,18 @@
+{
+    "contents" : "library(shiny)\nlibrary(httr)\nlibrary(XML)\n\n# Define server logic required to draw a histogram\nshinyServer(function(input, output) {\n  \n  observeEvent(input$do, {\n    \n    \n    output$histrent <- renderPlot({\n      \n      bedMin <- reactive({bMi=input$minBed})\n      bedMax <- reactive({bMa=input$maxBed})\n      \n      furnished       <- reactive({fur=input$furnished}) \n      includeRented   = \"true\"\n      pageSize        = \"100\"\n      priceFreq       = \"per_month\"\n      priceMin        <- reactive({pMi=input$minPr}) \n      priceMax        <- reactive({pMa=input$maxPr}) \n      searchRad       <- reactive({sRad=input$searchR})\n      \n      # loc=\"Oxford%20Station%2C%20Oxfordshire\"\n      loc=\"Reading%20Station\"\n       \n      url <- \"http://www.zoopla.co.uk/to-rent/flats/station/rail/oxford/\"\n      response <- GET(url,query=list(\n        beds_max=bedMax(),\n        beds_min=bedMin(),\n        furnished_state=furnished(),\n        include_rented=includeRented,\n        page_size=pageSize,\n        price_frequency=priceFreq,\n        price_min=priceMin(),\n        price_max=priceMax(),\n        q=loc,\n        radius=searchRad()\n      ))\n      \n      html <- htmlTreeParse(response, useInternalNodes = T)\n      rootNode <- xmlRoot(html)\n      listing <- xpathSApply(html,\"//div[@class='listing-results-right']\",xmlValue)\n      prices <- gsub(\"^.*\\\\£ *(.*) * pcm.*$\", \"\\\\1\", listing)\n      prices <- as.numeric(gsub(\",\",\"\", prices))\n      meanPrice <- mean(prices)\n      medPrice <- median(prices)\n      \n      if(length(prices) < 5) {\n        output$pErr <- renderText({ \n          paste(\"less than 5 properties found in this price range. Try increasing Max Price\")\n        })\n        output$meanTxt <- renderText({paste(\"\")})\n        output$medTxt  <- renderText({paste(\"\")})\n      } else {\n        \n        hist(prices,main=\"Results from Zoopla  (100 maximum entries) \",breaks = 10,col=\"green\",prob=FALSE)\n        #     # lines(density(prices))\n        abline(v=medPrice,col=\"blue\",lwd = 3)\n        abline(v=meanPrice,col=\"red\",lwd = 3)\n        output$pErr    <- renderText({paste(\"\")})\n        output$numTxt  <- renderText({paste(\"Total number of properties retrieved from Zoopla = \",length(prices)) })\n        output$meanTxt <- renderText({paste(\"Average Price = \",as.integer(meanPrice)) })\n        output$medTxt  <- renderText({paste(\"Median Price   = \",medPrice)})\n      }\n    })\n    \n  })\n})\n",
+    "created" : 1449176126248.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2526599877",
+    "id" : "D7DDDC35",
+    "lastKnownWriteTime" : 1449421332,
+    "path" : "~/GitHub/app/testing/server.R",
+    "project_path" : "server.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
